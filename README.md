@@ -10,7 +10,7 @@ Frameworks
 2.Microsoft.NETCore.App
 
 In this project three API is there.
-1. /api/getLatestItems  - In this API client will get all the story elements details by descending order of score.
-2. /api/getIDs- In this API Client will get ID list.
+1. /api/Story/getLatestItems  - In this API client will get all the story elements details by descending order of score.
+2. /api/Story/getIDs- In this API Client will get ID list.
 3. /api/Story/getDetailByID/{ID} - In this API client will get individual story detail based on the ID. where ID is optional.
 
