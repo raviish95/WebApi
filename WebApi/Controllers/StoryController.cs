@@ -11,19 +11,18 @@ namespace WebApi.Controllers
     [ApiController]
     [Route("api/[controller]")]
     public class StoryController 
-    {
-             
+    {       
         [HttpGet("getLatestItems")]
         public List<Story> Get()
         {
-            int[] result = GetIDList("https://hacker-news.firebaseio.com/v0/beststories.json");
+            int[] result = GetIDList();
             List<Story> mylist = new List<Story>();
             if (result.Length>0)
             {
                 List<Story> stories = new List<Story>();
                 for(int i=0;i<result.Length;i++)
                 {
-                    Story story = GetIDDetail("https://hacker-news.firebaseio.com/v0/item/" + result[i]+".json");
+                    Story story = GetIDDetail(result[i]);
                     mylist.Add(story);
                 }
             }
@@ -31,9 +30,11 @@ namespace WebApi.Controllers
             return mylist;
         }
 
-        public int[] GetIDList(string urlvalue)
+        [HttpGet("getIDs")]
+        public int[] GetIDList()
         {
-             int[] data=new int[] { };
+            var urlvalue = "https://hacker-news.firebaseio.com/v0/beststories.json";
+            int[] data=new int[] { };
             try
             {
                 HttpClient client = new HttpClient();
@@ -50,9 +51,10 @@ namespace WebApi.Controllers
             
             return data;
         }
-
-        public Story GetIDDetail(string urlvalue)
+        [HttpGet("getDetailByID/{ID?}")]
+        public Story GetIDDetail(int ID=0)
         {
+            var urlvalue = "https://hacker-news.firebaseio.com/v0/item/" + ID + ".json";
             Story story = new Story();
             try
             {
@@ -61,13 +63,16 @@ namespace WebApi.Controllers
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 HttpResponseMessage response = client.GetAsync(urlvalue).Result;
                 var value = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
-                story.title = (string?)value["title"];
-                story.uri = (string?)value["url"];
-                story.postedBy = (string?)value["by"];
-                DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)value["time"]);
-                story.time = dateTimeOffset.ToString("yyyy-MM-ddTHH:mm:sszzz");                 
-                story.score= (int)value["score"];                
-                story.commentCount = ((string?)value["type"]).Count(); ;
+                if (value != null)
+                {
+                    story.title = (string?)value["title"];
+                    story.uri = (string?)value["url"];
+                    story.postedBy = (string?)value["by"];
+                    DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)value["time"]);
+                    story.time = dateTimeOffset.ToString("yyyy-MM-ddTHH:mm:sszzz");
+                    story.score = (int)value["score"];
+                    story.commentCount = ((string?)value["type"]).Count(); ;
+                }
 
             }
             catch
